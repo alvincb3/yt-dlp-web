@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 import subprocess
 import uuid
 import os
@@ -17,6 +18,8 @@ app.add_middleware(
 
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
 
 @app.post("/api/download")
 async def download_video(request: Request):
