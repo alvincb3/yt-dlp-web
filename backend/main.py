@@ -19,7 +19,7 @@ app.add_middleware(
 DOWNLOAD_DIR = "downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-app.mount("/", StaticFiles(directory="frontend/build", html=True), name="static")
+
 
 @app.post("/api/download")
 async def download_video(request: Request):
@@ -50,3 +50,5 @@ def get_download(filename: str):
     if not os.path.exists(file_path):
         return JSONResponse(status_code=404, content={"error": "File not found"})
     return FileResponse(path=file_path, filename=filename)
+
+app.mount("/", StaticFiles(directory="frontend/build", html=True), name="frontend")

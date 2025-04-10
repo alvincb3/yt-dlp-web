@@ -1,24 +1,25 @@
 FROM python:3.11-slim
 
-# Install yt-dlp & Node.js
-RUN apt-get update && apt-get install -y \
-    nodejs npm ffmpeg curl && \
-    pip install yt-dlp fastapi uvicorn && \
-    npm install -g serve && \
-    apt-get clean
+# Install system dependencies
+RUN apt-get update && apt-get install -y ffmpeg curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy backend
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Add backend code
+COPY backend /app/backend
+
+# Add built React frontend
+COPY frontend/build /app/frontend/build
+
+# Create directory for downloads
+RUN mkdir -p /app/downloads
 WORKDIR /app
-COPY backend ./backend
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
 
-# Copy frontend build
-COPY frontend/build ./frontend/build
+# Expose the FastAPI port
+EXPOSE 8000
 
-# Create download dir
-RUN mkdir downloads
-
-# Start both frontend and backend
-CMD uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
-CMD serve -s frontend/build -l 3000
+# Start FastAPI
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
